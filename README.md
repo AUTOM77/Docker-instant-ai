@@ -11,6 +11,25 @@
 
 🚧 Building .. 🚧
 
+Run
+```sh
+# AI_SERVICE_IP="10.88.0.1"
+AI_SERVICE_HOST="host.containers.internal"
+
+doas podman run -itd \
+    --name instant-ai \
+    -e DOMAIN=domain \
+    -e CF_Token=$CF_Token \
+    -e CF_Zone_ID=$CF_Zone_ID \
+    -e CF_Account_ID=$CF_Account_ID \
+    -e AI_SERVICE_NAME=$AI_SERVICE_NAME \
+    -e AI_SERVICE_HOST="$AI_SERVICE_HOST" \
+    -e AI_SERVICE_PORT=$AI_SERVICE_PORT \
+    -p 80:80 \
+    -p 443:443 \
+    monius/docker-instant-ai
+```
+
 Test
 ```sh
 doas podman run --name ii -p 80:80 -p 443:443 -itd monius/docker-instant-ai
