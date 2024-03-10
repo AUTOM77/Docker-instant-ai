@@ -25,7 +25,9 @@ doas podman run --name ii -p 80:80 -p 443:443 -it monius/docker-instant-ai /bin/
 doas podman run -itd \
     --name instant-ai \
     -e DOMAIN=domain \
-    -e CLOUDFLARE_DNS_API_TOKEN=cf_api_token \
+    -e CF_Token=cf_api_token \
+    -e CF_Zone_ID=cf_zone_id \
+    -e CF_Account_ID=cf_acc_id \
     -e AI_SERVICE_NAME=ai_name \
     -e AI_SERVICE_PORT=ai_port \
     -p 80:80 \
