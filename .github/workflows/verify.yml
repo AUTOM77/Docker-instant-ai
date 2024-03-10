@@ -1,0 +1,25 @@
+name: verify
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["build"]
+    types:
+      - completed
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      name: ${{ github.job }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - run: |
+          docker run --name DIA -p 80:80 -p 443:443 --restart=always -itd ${{ secrets.DOCKERHUB_USERNAME }}/docker-instant-ai 
+      - id: check
+        run: echo trace=$(curl -v -fsSL 127.0.0.1:80) >> $GITHUB_OUTPUT
+

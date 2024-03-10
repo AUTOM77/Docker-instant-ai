@@ -1,0 +1,65 @@
+FROM alpine:3.19 as NGINX
+
+LABEL maintainer="M0nius <m0niusplus@gmail.com>" \
+    alpine-version="3.19" \
+    nginx-version="1.25.3"
+
+ENV XUSER="nginx"
+ENV VER="1.25.3"
+ENV NGINX_SRC="https://nginx.org/download/nginx-${VER}.tar.gz"
+ENV PKG="build-base linux-headers openssl-dev pcre-dev curl zlib-dev"
+
+RUN \
+    apk --no-cache add ${PKG} && \
+    curl -fsSL "${NGINX_SRC}" | tar -C /tmp -xz && \
+    cd /tmp/nginx-"${VER}" && \
+    ./configure \
+        --prefix=/etc/nginx \
+        --sbin-path=/usr/sbin/nginx \
+        --conf-path=/etc/nginx/nginx.conf \
+        --error-log-path=/var/log/nginx/error.log \
+        --http-log-path=/var/log/nginx/access.log \
+        --pid-path=/var/run/nginx.pid \
+        --lock-path=/var/run/nginx.lock \
+        --http-client-body-temp-path=/var/cache/nginx/client_temp \
+        --http-proxy-temp-path=/var/cache/nginx/proxy_temp \
+        --user=$XUSER \
+        --group=$XUSER \
+        --with-http_ssl_module \
+        --with-http_realip_module \
+        --with-http_addition_module \
+        --with-http_sub_module \
+        --with-http_dav_module \
+        --with-http_flv_module \
+        --with-http_mp4_module \
+        --with-http_gunzip_module \
+        --with-http_gzip_static_module \
+        --with-http_random_index_module \
+        --with-http_secure_link_module \
+        --with-http_stub_status_module \
+        --with-http_auth_request_module \
+        --with-file-aio \
+        --with-threads \
+        --with-stream \
+        --with-stream_ssl_module \
+        --with-stream_realip_module \
+        --with-http_slice_module \
+        --with-http_v2_module && \
+    make -j"$(nproc)" && make install
+
+RUN curl -fsSL https://get.acme.sh | sh -s email=a@b.c
+
+FROM alpine:3.19
+ENV XUSER nginx
+
+RUN apk --no-cache add ca-certificates openssl pcre zlib tzdata git
+
+COPY --from=NGINX /usr/sbin/nginx /usr/sbin/nginx
+COPY --from=NGINX /root/.acme.sh/acme.sh /root/acme.sh
+
+# RUN du -sh / >> /etc/store.debug
+
+RUN addgroup -S ${XUSER} && \
+    adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G ${XUSER} ${XUSER}
+
+# RUN du -sh / >> /etc/store.debug
