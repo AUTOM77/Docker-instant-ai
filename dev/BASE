@@ -47,15 +47,17 @@ RUN \
         --with-http_v2_module && \
     make -j"$(nproc)" && make install
 
-RUN curl -fsSL https://get.acme.sh | sh -s email=a@b.c
+# RUN curl -fsSL https://get.acme.sh | sh -s email=a@b.c
 
 FROM alpine:3.19
 ENV XUSER nginx
 
-RUN apk --no-cache add ca-certificates openssl pcre zlib tzdata git
+RUN apk --no-cache add ca-certificates openssl pcre zlib tzdata git curl
 
 COPY --from=NGINX /usr/sbin/nginx /usr/sbin/nginx
-COPY --from=NGINX /root/.acme.sh/acme.sh /root/acme.sh
+# COPY --from=NGINX /root/.acme.sh/acme.sh /root/acme.sh
+
+RUN curl -fsSL https://get.acme.sh | sh -s email=a@b.c
 
 # RUN du -sh / >> /etc/store.debug
 
