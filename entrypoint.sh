@@ -176,17 +176,6 @@ working. Further configuration is required.</p>
 </html>
 EOF
 
-if [ ! -d $NG_SSL ] && [ -e $NG_ACME ]; then
-    mkdir -p $NG_SSL
-
-    $NG_ACME  --issue -d "$DOMAIN" -d "$AI_SERVICE_NAME.$DOMAIN"  --dns dns_cf
-
-    $NG_ACME --install-cert -d "$DOMAIN" \
-    --key-file       "$SSL_KEY"  \
-    --fullchain-file "$SSL_FULL_CHAIN" \
-    --dns dns_cf
-fi
-
 if [ ! -e $NG_CONF ]; then
     cat <<EOF | tee $NG_CONF
         daemon off;
@@ -259,6 +248,17 @@ EOF
                 real_ip_header   proxy_protocol;
             }
 EOF
+
+        if [ ! -d $NG_SSL ] && [ -e $NG_ACME ]; then
+            mkdir -p $NG_SSL
+
+            $NG_ACME  --issue -d "$DOMAIN" -d "$AI_SERVICE_NAME.$DOMAIN"  --dns dns_cf
+
+            $NG_ACME --install-cert -d "$DOMAIN" \
+            --key-file       "$SSL_KEY"  \
+            --fullchain-file "$SSL_FULL_CHAIN" \
+            --dns dns_cf
+        fi
     fi
 fi
 
