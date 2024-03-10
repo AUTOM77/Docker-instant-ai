@@ -4,7 +4,7 @@ set -e
 
 sleep 3
 
-NG_ACME=~/.acme/acme.sh
+NG_ACME=~/.acme.sh/acme.sh
 NG_SSL=/etc/nginx/ssl
 NG_CONF=/etc/nginx/nginx.conf
 NG_DEBUG=/etc/nginx/service.d/default
@@ -252,7 +252,7 @@ EOF
         if [ ! -d $NG_SSL ] && [ -e $NG_ACME ]; then
             mkdir -p $NG_SSL
 
-            $NG_ACME  --issue -d "$DOMAIN" -d "$AI_SERVICE_NAME.$DOMAIN"  --dns dns_cf
+            $NG_ACME --issue -d "$AI_SERVICE_NAME.$DOMAIN" --dns dns_cf -k ec-256
 
             $NG_ACME --install-cert -d "$DOMAIN" \
             --key-file       "$SSL_KEY"  \
