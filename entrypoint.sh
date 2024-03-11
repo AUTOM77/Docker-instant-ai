@@ -51,7 +51,6 @@ EOF
 
 cat <<'EOF' | tee /etc/nginx/conf.d/tcp.conf
 sendfile on;
-aio threads;
 tcp_nopush on;
 tcp_nodelay on;
 port_in_redirect off;
@@ -228,18 +227,15 @@ EOF
             {
                 listen                          443 ssl;
                 http2 on;
-                http2_body_preread_size 512k;
                 server_name             ${AI_FULL_DOMAIN};
                 ssl_certificate         ${SSL_FULL_CHAIN};
                 ssl_certificate_key     ${SSL_KEY};
                 ssl_dhparam             ${SSL_DHPARAM};
 
-                resolver 1.1.1.1 8.8.8.8;
+                resolver 8.8.8.8 1.1.1.1;
 
                 client_max_body_size 100M;
                 client_body_buffer_size 70m;
-                client_header_buffer_size 50k;
-                large_client_header_buffers 2 50k;
 
                 location / {
                     proxy_pass http://${AI_SERVICE_HOST}:${AI_SERVICE_PORT}/;
@@ -261,7 +257,6 @@ EOF
                 add_header X-Frame-Options "SAMEORIGIN";
                 add_header X-Content-Type-Options "nosniff";
                 add_header X-XSS-Protection "1; mode=block";
-                real_ip_header   proxy_protocol;
             }
 EOF
 
