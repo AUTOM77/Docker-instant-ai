@@ -226,7 +226,6 @@ EOF
             {
                 listen                          443 ssl;
                 http2 on;
-                http2_body_preread_size 512k;
                 server_name             ${AI_FULL_DOMAIN};
                 ssl_certificate         ${SSL_FULL_CHAIN};
                 ssl_certificate_key     ${SSL_KEY};
@@ -234,17 +233,16 @@ EOF
 
                 resolver 1.1.1.1 8.8.8.8;
 
-                client_max_body_size 0;
+                client_max_body_size 100M;
                 client_body_buffer_size 70m;
                 client_header_buffer_size 50k;
-                large_client_header_buffers 2 50k;
 
                 location / {
                     proxy_pass http://${AI_SERVICE_HOST}:${AI_SERVICE_PORT}/;
                     proxy_buffering off;
                     proxy_redirect off;
                     proxy_http_version 1.1;
-                    proxy_request_buffering on;
+                    proxy_request_buffering off;
 
                     proxy_connect_timeout  20s;
                     proxy_send_timeout  600s;
