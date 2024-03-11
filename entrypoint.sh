@@ -226,7 +226,7 @@ EOF
             {
                 listen                          443 ssl;
                 http2 on;
-                http2_body_preread_size 512KB;
+                http2_body_preread_size 512k;
                 server_name             ${AI_FULL_DOMAIN};
                 ssl_certificate         ${SSL_FULL_CHAIN};
                 ssl_certificate_key     ${SSL_KEY};
