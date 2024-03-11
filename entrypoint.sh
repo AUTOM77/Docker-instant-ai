@@ -11,9 +11,10 @@ NG_DEBUG=/etc/nginx/service.d/default
 NG_HTTP_UPGRADE='$http_upgrade'
 NG_HOST='$host'
 
-SSL_KEY="$NG_SSL/$DOMAIN.key"
-SSL_FULL_CHAIN="$NG_SSL/$DOMAIN.pem"
-SSL_DHPARAM="$NG_SSL/$DOMAIN.dpr"
+AI_FULL_DOMAIN="$AI_SERVICE_NAME.$DOMAIN"
+SSL_KEY="$NG_SSL/$AI_FULL_DOMAIN.key"
+SSL_FULL_CHAIN="$NG_SSL/$AI_FULL_DOMAIN.pem"
+SSL_DHPARAM="$NG_SSL/$AI_FULL_DOMAIN.dpr"
 
 mkdir -p /var/log/nginx
 mkdir -p /etc/nginx/conf.d
@@ -35,8 +36,8 @@ gzip_types text/plain text/css text/xml text/javascript application/json applica
 EOF
 
 cat <<'EOF' | tee /etc/nginx/conf.d/log.conf
-access_log /var/log/nginx/access.log warn;
-error_log /var/log/nginx/error.log warn;
+access_log /var/log/nginx/access.log;
+error_log /var/log/nginx/error.log;
 log_format main '$remote_addr - $remote_user [$time_local] '
                 '"$request" $status $body_bytes_sent "$http_referer" '
                 '"$http_user_agent" "$http_x_forwarded_for"';
@@ -215,11 +216,12 @@ EOF
     fi
 
     if [ -n "$DOMAIN" ] ; then
-        cat <<EOF | tee /etc/nginx/service.d/"$AI_SERVICE_NAME.$DOMAIN.conf"
+        cat <<EOF | tee /etc/nginx/service.d/"$AI_FULL_DOMAIN.conf"
             server
             {
-                listen                          443 ssl http2;
-                server_name                     ${AI_SERVICE_NAME}.${DOMAIN};
+                listen                          443 ssl;
+                http2 on;
+                server_name                     ${AI_FULL_DOMAIN};
 
                 ssl_certificate         ${SSL_FULL_CHAIN};
                 ssl_certificate_key     ${SSL_KEY};
@@ -229,7 +231,7 @@ EOF
                 client_max_body_size 100M;
 
                 location / {
-                    proxy_pass http://127.0.0.1:${AI_SERVICE_PORT}/;
+                    proxy_pass http://${AI_SERVICE_HOST}:${AI_SERVICE_PORT}/;
                     proxy_buffering off;
                     proxy_redirect off;
                     proxy_http_version 1.1;
@@ -251,13 +253,12 @@ EOF
 
         if [ ! -d $NG_SSL ] && [ -e $NG_ACME ]; then
             mkdir -p $NG_SSL
-
-            $NG_ACME --issue -d "$AI_SERVICE_NAME.$DOMAIN" --dns dns_cf -k ec-256
-
-            $NG_ACME --install-cert -d "$DOMAIN" \
+            $NG_ACME --issue -d "$AI_FULL_DOMAIN" --dns dns_cf -k ec-256
+            $NG_ACME --install-cert -d "$AI_FULL_DOMAIN" \
             --key-file       "$SSL_KEY"  \
             --fullchain-file "$SSL_FULL_CHAIN" \
-            --dns dns_cf
+            --dns dns_cf --ecc
+            openssl dhparam -dsaparam -out "$SSL_DHPARAM" 4096
         fi
     fi
 fi
