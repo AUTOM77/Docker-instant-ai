@@ -10,6 +10,9 @@ NG_CONF=/etc/nginx/nginx.conf
 NG_DEBUG=/etc/nginx/service.d/default
 NG_HTTP_UPGRADE='$http_upgrade'
 NG_HOST='$host'
+NG_REMOTE='$remote_addr'
+NG_FORWARD='$proxy_add_x_forwarded_for'
+NG_SCHEME='$scheme'
 
 AI_FULL_DOMAIN="$AI_SERVICE_NAME.$DOMAIN"
 SSL_KEY="$NG_SSL/$AI_FULL_DOMAIN.key"
@@ -246,18 +249,19 @@ EOF
                     proxy_http_version 1.1;
                     proxy_request_buffering off;
 
-                    proxy_set_header Upgrade ${NG_HTTP_UPGRADE};
-                    proxy_set_header Connection "upgrade";
                     proxy_set_header Host ${NG_HOST};
+                    proxy_set_header X-Real-IP ${NG_REMOTE};
+                    proxy_set_header Upgrade ${NG_HTTP_UPGRADE};
+                    proxy_set_header X-Forwarded-For ${NG_FORWARD};
+                    proxy_set_header X-Forwarded-Proto ${NG_SCHEME};
+                    proxy_set_header Connection "upgrade";
                 }
 
                 add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
                 add_header Referrer-Policy no-referrer-when-downgrade;
-                add_header Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data:;";
                 add_header X-Frame-Options "SAMEORIGIN";
                 add_header X-Content-Type-Options "nosniff";
                 add_header X-XSS-Protection "1; mode=block";
-                set_real_ip_from unix:;
                 real_ip_header   proxy_protocol;
             }
 EOF
