@@ -32,6 +32,9 @@ gzip_proxied any;
 gzip_comp_level 6;
 gzip_buffers 16 8k;
 gzip_http_version 1.1;
+gzip_min_length 10240;
+gzip_disable msie6;
+gzip_proxied expired no-cache no-store private auth;
 gzip_types text/plain text/css text/xml text/javascript application/json application/javascript  application/xml application/xml+rss application/sla application/vnd.ms-pki.stl;
 EOF
 
@@ -45,6 +48,7 @@ EOF
 
 cat <<'EOF' | tee /etc/nginx/conf.d/tcp.conf
 sendfile on;
+aio threads;
 tcp_nopush on;
 tcp_nodelay on;
 port_in_redirect off;
@@ -181,11 +185,12 @@ if [ ! -e $NG_CONF ]; then
     cat <<EOF | tee $NG_CONF
         daemon off;
         worker_processes auto;
+        worker_rlimit_nofile 100000;
         error_log stderr notice;
         pid /run/nginx.pid;
 
         events {
-            worker_connections 1024;
+            worker_connections 2048;
             multi_accept on;
             use epoll;
         }
@@ -221,8 +226,8 @@ EOF
             {
                 listen                          443 ssl;
                 http2 on;
-                server_name                     ${AI_FULL_DOMAIN};
-
+                http2_body_preread_size 512KB;
+                server_name             ${AI_FULL_DOMAIN};
                 ssl_certificate         ${SSL_FULL_CHAIN};
                 ssl_certificate_key     ${SSL_KEY};
                 ssl_dhparam             ${SSL_DHPARAM};
@@ -235,6 +240,7 @@ EOF
                     proxy_buffering off;
                     proxy_redirect off;
                     proxy_http_version 1.1;
+                    proxy_request_buffering on;
                     proxy_set_header Upgrade ${NG_HTTP_UPGRADE};
                     proxy_set_header Connection "upgrade";
                     proxy_set_header Host ${NG_HOST};
