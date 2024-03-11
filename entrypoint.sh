@@ -188,7 +188,6 @@ if [ ! -e $NG_CONF ]; then
     cat <<EOF | tee $NG_CONF
         daemon off;
         worker_processes auto;
-        worker_rlimit_nofile 100000;
         error_log stderr notice;
         pid /run/nginx.pid;
 
