@@ -26,6 +26,7 @@ mkdir -p /etc/nginx/html
 
 
 cat <<'EOF' | tee /etc/nginx/conf.d/gzip.conf
+
 types_hash_max_size 2048;
 server_names_hash_bucket_size 256;
 
@@ -35,9 +36,6 @@ gzip_proxied any;
 gzip_comp_level 6;
 gzip_buffers 16 8k;
 gzip_http_version 1.1;
-gzip_min_length 10240;
-gzip_disable msie6;
-gzip_proxied expired no-cache no-store private auth;
 gzip_types text/plain text/css text/xml text/javascript application/json application/javascript  application/xml application/xml+rss application/sla application/vnd.ms-pki.stl;
 EOF
 
@@ -55,7 +53,7 @@ tcp_nopush on;
 tcp_nodelay on;
 port_in_redirect off;
 server_name_in_redirect on;
-keepalive_timeout 10m;
+keepalive_timeout 65;
 set_real_ip_from 127.0.0.1;
 real_ip_header proxy_protocol;
 EOF
@@ -243,12 +241,14 @@ EOF
                     proxy_redirect off;
                     proxy_http_version 1.1;
 
-                    proxy_set_header Host ${NG_HOST};
+                    proxy_set_header Upgrade ${NG_HTTP_UPGRADE};
                     proxy_set_header Connection "upgrade";
+                    proxy_set_header Host ${NG_HOST};
                 }
 
                 add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
                 add_header Referrer-Policy no-referrer-when-downgrade;
+                add_header Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data:;";
                 add_header X-Frame-Options "SAMEORIGIN";
                 add_header X-Content-Type-Options "nosniff";
                 add_header X-XSS-Protection "1; mode=block";
