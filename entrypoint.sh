@@ -53,7 +53,7 @@ tcp_nopush on;
 tcp_nodelay on;
 port_in_redirect off;
 server_name_in_redirect on;
-keepalive_timeout 65;
+keepalive_timeout 10m;
 set_real_ip_from 127.0.0.1;
 real_ip_header proxy_protocol;
 EOF
@@ -232,8 +232,12 @@ EOF
                 ssl_certificate_key     ${SSL_KEY};
                 ssl_dhparam             ${SSL_DHPARAM};
 
-                resolver 8.8.8.8 8.8.4.4;
-                client_max_body_size 100M;
+                resolver 1.1.1.1 8.8.8.8;
+
+                client_max_body_size 0;
+                client_body_buffer_size 70m;
+                client_header_buffer_size 50k;
+                large_client_header_buffers 2 50k;
 
                 location / {
                     proxy_pass http://${AI_SERVICE_HOST}:${AI_SERVICE_PORT}/;
@@ -241,6 +245,11 @@ EOF
                     proxy_redirect off;
                     proxy_http_version 1.1;
                     proxy_request_buffering on;
+
+                    proxy_connect_timeout  20s;
+                    proxy_send_timeout  600s;
+                    proxy_read_timeout  150s;
+
                     proxy_set_header Upgrade ${NG_HTTP_UPGRADE};
                     proxy_set_header Connection "upgrade";
                     proxy_set_header Host ${NG_HOST};
