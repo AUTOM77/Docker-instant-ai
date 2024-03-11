@@ -52,7 +52,7 @@ RUN \
 FROM alpine:3.19
 ENV XUSER nginx
 
-RUN apk --no-cache add ca-certificates openssl pcre zlib tzdata git curl
+RUN apk --no-cache add ca-certificates openssl pcre zlib tzdata git socat curl
 
 COPY --from=NGINX /usr/sbin/nginx /usr/sbin/nginx
 # COPY --from=NGINX /root/.acme.sh/acme.sh /root/acme.sh
