@@ -237,8 +237,9 @@ EOF
 
                 location / {
                     proxy_pass http://${AI_SERVICE_HOST}:${AI_SERVICE_PORT}/;
-                    proxy_buffering off;
                     proxy_redirect off;
+                    proxy_buffering off;
+                    proxy_request_buffering off;
                     proxy_http_version 1.1;
 
                     proxy_set_header Upgrade ${NG_HTTP_UPGRADE};
@@ -248,7 +249,6 @@ EOF
 
                 add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
                 add_header Referrer-Policy no-referrer-when-downgrade;
-                add_header Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data:;";
                 add_header X-Frame-Options "SAMEORIGIN";
                 add_header X-Content-Type-Options "nosniff";
                 add_header X-XSS-Protection "1; mode=block";
@@ -257,7 +257,7 @@ EOF
 
         if [ ! -d $NG_SSL ] && [ -e $NG_ACME ]; then
             mkdir -p $NG_SSL
-            $NG_ACME --issue -d "$AI_FULL_DOMAIN" --dns dns_cf -k ec-256 --debug 2
+            $NG_ACME --issue -d "$AI_FULL_DOMAIN" --dns dns_cf -k ec-256
             $NG_ACME --install-cert -d "$AI_FULL_DOMAIN" \
             --key-file       "$SSL_KEY"  \
             --fullchain-file "$SSL_FULL_CHAIN" \
