@@ -191,7 +191,7 @@ if [ ! -e $NG_CONF ]; then
         pid /run/nginx.pid;
 
         events {
-            worker_connections 2048;
+            worker_connections 1024;
             multi_accept on;
             use epoll;
         }
@@ -242,13 +242,8 @@ EOF
                     proxy_buffering off;
                     proxy_redirect off;
                     proxy_http_version 1.1;
-                    proxy_request_buffering off;
 
                     proxy_set_header Host ${NG_HOST};
-                    proxy_set_header X-Real-IP ${NG_REMOTE};
-                    proxy_set_header Upgrade ${NG_HTTP_UPGRADE};
-                    proxy_set_header X-Forwarded-For ${NG_FORWARD};
-                    proxy_set_header X-Forwarded-Proto ${NG_SCHEME};
                     proxy_set_header Connection "upgrade";
                 }
 
