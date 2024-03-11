@@ -18,7 +18,7 @@ AI_SERVICE_HOST="host.containers.internal"
 
 doas podman run -itd \
     --name instant-ai \
-    -e DOMAIN=domain \
+    -e DOMAIN=$DOMAIN \
     -e CF_Token=$CF_Token \
     -e CF_Zone_ID=$CF_Zone_ID \
     -e CF_Account_ID=$CF_Account_ID \
