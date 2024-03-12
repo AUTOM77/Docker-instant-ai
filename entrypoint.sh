@@ -12,6 +12,7 @@ NG_HTTP_UPGRADE='$http_upgrade'
 NG_HOST='$host'
 NG_REMOTE='$remote_addr'
 NG_FORWARD='$proxy_add_x_forwarded_for'
+NG_FORWARD_PR='$http_x_forwarded_proto'
 NG_SCHEME='$scheme'
 
 AI_FULL_DOMAIN="$AI_SERVICE_NAME.$DOMAIN"
@@ -33,6 +34,8 @@ gzip on;
 gzip_vary on;
 gzip_proxied any;
 gzip_comp_level 6;
+gzip_disable "msie6";
+gzip_min_length 200;
 gzip_buffers 16 8k;
 gzip_http_version 1.1;
 gzip_types text/plain text/css text/xml text/javascript application/json application/javascript  application/xml application/xml+rss application/sla application/vnd.ms-pki.stl;
@@ -53,7 +56,6 @@ tcp_nodelay on;
 port_in_redirect off;
 server_name_in_redirect on;
 keepalive_timeout 65;
-set_real_ip_from 127.0.0.1;
 real_ip_header proxy_protocol;
 EOF
 
@@ -183,12 +185,13 @@ EOF
 if [ ! -e $NG_CONF ]; then
     cat <<EOF | tee $NG_CONF
         daemon off;
-        worker_processes auto;
+        worker_processes 1;
         error_log stderr notice;
         pid /run/nginx.pid;
 
         events {
-            worker_connections 1024;
+            accept_mutex off
+            worker_connections 2048;
             multi_accept on;
             use epoll;
         }
@@ -245,6 +248,9 @@ EOF
                         proxy_set_header Upgrade ${NG_HTTP_UPGRADE};
                         proxy_set_header Connection "upgrade";
                         proxy_set_header Host ${NG_HOST};
+                        proxy_set_header X-Real-IP ${NG_REMOTE};
+                        proxy_set_header X-Forwarded-For ${NG_FORWARD};
+                        proxy_set_header X-Forwarded-Proto ${NG_FORWARD_PR};
                     }
 
                     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
@@ -252,6 +258,9 @@ EOF
                     add_header X-Frame-Options "SAMEORIGIN";
                     add_header X-Content-Type-Options "nosniff";
                     add_header X-XSS-Protection "1; mode=block";
+                    set_real_ip_from 127.0.0.1;
+                    real_ip_header X-Forwarded-For;
+                    real_ip_recursive on;
                 }
 EOF
         fi
@@ -281,6 +290,9 @@ EOF
                         proxy_set_header Upgrade ${NG_HTTP_UPGRADE};
                         proxy_set_header Connection "upgrade";
                         proxy_set_header Host ${NG_HOST};
+                        proxy_set_header X-Real-IP ${NG_REMOTE};
+                        proxy_set_header X-Forwarded-For ${NG_FORWARD};
+                        proxy_set_header X-Forwarded-Proto ${NG_FORWARD_PR};
                     }
 
                     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
@@ -288,6 +300,9 @@ EOF
                     add_header X-Frame-Options "SAMEORIGIN";
                     add_header X-Content-Type-Options "nosniff";
                     add_header X-XSS-Protection "1; mode=block";
+                    set_real_ip_from unix:;
+                    real_ip_header X-Forwarded-For;
+                    real_ip_recursive on;
                 }
 EOF
         fi
