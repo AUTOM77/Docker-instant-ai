@@ -218,41 +218,79 @@ EOF
 EOF
     fi
 
-    if [ -n "$DOMAIN" ] ; then
-        cat <<EOF | tee /etc/nginx/service.d/"$AI_FULL_DOMAIN.conf"
-            server
-            {
-                listen                          443 ssl;
-                http2 on;
-                server_name             ${AI_FULL_DOMAIN};
-                ssl_certificate         ${SSL_FULL_CHAIN};
-                ssl_certificate_key     ${SSL_KEY};
-                ssl_dhparam             ${SSL_DHPARAM};
+    if [ -n "$DOMAIN" ]; then
+        if [ -n "$AI_SERVICE_HOST" ] && [ -n "$AI_SERVICE_PORT" ]; then
+            cat <<EOF | tee /etc/nginx/service.d/"$AI_FULL_DOMAIN.conf"
+                server
+                {
+                    listen                          443 ssl;
+                    http2 on;
+                    server_name             ${AI_FULL_DOMAIN};
+                    ssl_certificate         ${SSL_FULL_CHAIN};
+                    ssl_certificate_key     ${SSL_KEY};
+                    ssl_dhparam             ${SSL_DHPARAM};
 
-                resolver 8.8.8.8 1.1.1.1;
+                    resolver 8.8.8.8 1.1.1.1;
 
-                client_max_body_size 100M;
-                client_body_buffer_size 70m;
+                    client_max_body_size 100M;
+                    client_body_buffer_size 70m;
 
-                location / {
-                    proxy_pass http://${AI_SERVICE_HOST}:${AI_SERVICE_PORT}/;
-                    proxy_redirect off;
-                    proxy_buffering off;
-                    proxy_request_buffering off;
-                    proxy_http_version 1.1;
+                    location / {
+                        proxy_pass http://${AI_SERVICE_HOST}:${AI_SERVICE_PORT}/;
+                        proxy_redirect off;
+                        proxy_buffering off;
+                        proxy_request_buffering off;
+                        proxy_http_version 1.1;
 
-                    proxy_set_header Upgrade ${NG_HTTP_UPGRADE};
-                    proxy_set_header Connection "upgrade";
-                    proxy_set_header Host ${NG_HOST};
+                        proxy_set_header Upgrade ${NG_HTTP_UPGRADE};
+                        proxy_set_header Connection "upgrade";
+                        proxy_set_header Host ${NG_HOST};
+                    }
+
+                    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+                    add_header Referrer-Policy no-referrer-when-downgrade;
+                    add_header X-Frame-Options "SAMEORIGIN";
+                    add_header X-Content-Type-Options "nosniff";
+                    add_header X-XSS-Protection "1; mode=block";
                 }
-
-                add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
-                add_header Referrer-Policy no-referrer-when-downgrade;
-                add_header X-Frame-Options "SAMEORIGIN";
-                add_header X-Content-Type-Options "nosniff";
-                add_header X-XSS-Protection "1; mode=block";
-            }
 EOF
+        fi
+
+        if [ -n "$AI_SOCKET" ]; then
+            cat <<EOF | tee /etc/nginx/service.d/"$AI_FULL_DOMAIN.conf"
+                server
+                {
+                    listen                          443 ssl;
+                    http2 on;
+                    server_name             ${AI_FULL_DOMAIN};
+                    ssl_certificate         ${SSL_FULL_CHAIN};
+                    ssl_certificate_key     ${SSL_KEY};
+                    ssl_dhparam             ${SSL_DHPARAM};
+
+                    resolver 8.8.8.8 1.1.1.1;
+
+                    client_max_body_size 100M;
+                    client_body_buffer_size 70m;
+
+                    location / {
+                        proxy_pass unix:${AI_SOCKET};
+                        proxy_redirect off;
+                        proxy_buffering off;
+                        proxy_request_buffering off;
+
+                        proxy_set_header Upgrade ${NG_HTTP_UPGRADE};
+                        proxy_set_header Connection "upgrade";
+                        proxy_set_header Host ${NG_HOST};
+                    }
+
+                    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+                    add_header Referrer-Policy no-referrer-when-downgrade;
+                    add_header X-Frame-Options "SAMEORIGIN";
+                    add_header X-Content-Type-Options "nosniff";
+                    add_header X-XSS-Protection "1; mode=block";
+                }
+EOF
+        fi
 
         if [ ! -e "$SSL_FULL_CHAIN" ] && [ -e $NG_ACME ]; then
             mkdir -p $NG_SSL
