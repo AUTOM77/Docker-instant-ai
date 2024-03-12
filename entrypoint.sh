@@ -256,7 +256,7 @@ EOF
 
         if [ ! -e "$SSL_FULL_CHAIN" ] && [ -e $NG_ACME ]; then
             mkdir -p $NG_SSL
-            $NG_ACME --issue -d "$AI_FULL_DOMAIN" --dns dns_cf -k ec-256
+            $NG_ACME --server letsencrypt --issue -d "$AI_FULL_DOMAIN" --dns dns_cf -k ec-256
             $NG_ACME --install-cert -d "$AI_FULL_DOMAIN" \
             --key-file       "$SSL_KEY"  \
             --fullchain-file "$SSL_FULL_CHAIN" \

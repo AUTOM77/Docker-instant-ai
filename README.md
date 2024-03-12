@@ -16,7 +16,7 @@ Run
 # AI_SERVICE_IP="10.88.0.1"
 AI_SERVICE_HOST="host.containers.internal"
 
-doas podman run -itd \
+doas podman run --restart=always -itd \
     --name instant-ai \
     -e DOMAIN=$DOMAIN \
     -e CF_Token=$CF_Token \
