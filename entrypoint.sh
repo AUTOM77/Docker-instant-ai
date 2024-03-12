@@ -12,7 +12,6 @@ NG_HTTP_UPGRADE='$http_upgrade'
 NG_HOST='$host'
 NG_REMOTE='$remote_addr'
 NG_FORWARD='$proxy_add_x_forwarded_for'
-NG_FORWARD_PR='$http_x_forwarded_proto'
 NG_SCHEME='$scheme'
 
 AI_FULL_DOMAIN="$AI_SERVICE_NAME.$DOMAIN"
@@ -250,7 +249,7 @@ EOF
                         proxy_set_header Host ${NG_HOST};
                         proxy_set_header X-Real-IP ${NG_REMOTE};
                         proxy_set_header X-Forwarded-For ${NG_FORWARD};
-                        proxy_set_header X-Forwarded-Proto ${NG_FORWARD_PR};
+                        proxy_set_header X-Forwarded-Proto ${NG_SCHEME};
                     }
 
                     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
@@ -292,7 +291,7 @@ EOF
                         proxy_set_header Host ${NG_HOST};
                         proxy_set_header X-Real-IP ${NG_REMOTE};
                         proxy_set_header X-Forwarded-For ${NG_FORWARD};
-                        proxy_set_header X-Forwarded-Proto ${NG_FORWARD_PR};
+                        proxy_set_header X-Forwarded-Proto ${NG_SCHEME};
                     }
 
                     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
