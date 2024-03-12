@@ -27,6 +27,7 @@ doas podman run -itd \
     -e AI_SERVICE_PORT=$AI_SERVICE_PORT \
     -p 80:80 \
     -p 443:443 \
+    -v /etc/ssl/$DOMAIN:/etc/ssl:rw \
     monius/docker-instant-ai
 ```
 

@@ -24,7 +24,6 @@ mkdir -p /etc/nginx/conf.d
 mkdir -p /etc/nginx/service.d
 mkdir -p /etc/nginx/html
 
-
 cat <<'EOF' | tee /etc/nginx/conf.d/gzip.conf
 
 types_hash_max_size 2048;
@@ -255,7 +254,7 @@ EOF
             }
 EOF
 
-        if [ ! -d $NG_SSL ] && [ -e $NG_ACME ]; then
+        if [ ! -e "$SSL_FULL_CHAIN" ] && [ -e $NG_ACME ]; then
             mkdir -p $NG_SSL
             $NG_ACME --issue -d "$AI_FULL_DOMAIN" --dns dns_cf -k ec-256
             $NG_ACME --install-cert -d "$AI_FULL_DOMAIN" \
