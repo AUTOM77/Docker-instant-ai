@@ -65,3 +65,4 @@ Reference
 > 1. https://www.nginx.com/blog/inside-nginx-how-we-designed-for-performance-scale
 > 2. https://kisspeter.github.io/fastapi-performance-optimization/nginx_port_socket.html
 > 3. https://gist.github.com/3052776
+> 4. https://dev.to/abhijithganesh/how-to-deploy-any-python-web-application-1707
