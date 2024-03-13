@@ -265,6 +265,7 @@ EOF
         fi
 
         if [ -n "$AI_SOCKET" ]; then
+            chmod 777 "$AI_SOCKET"
             cat <<EOF | tee /etc/nginx/service.d/"$AI_FULL_DOMAIN.conf"
                 server
                 {
@@ -281,7 +282,7 @@ EOF
                     client_body_buffer_size 70m;
 
                     location / {
-                        proxy_pass http://unix:${AI_SOCKET}:/;
+                        proxy_pass http://unix:${AI_SOCKET};
                         proxy_redirect off;
                         proxy_buffering off;
                         proxy_request_buffering off;
@@ -302,15 +303,6 @@ EOF
                     set_real_ip_from unix:;
                     real_ip_header X-Forwarded-For;
                     real_ip_recursive on;
-                }
-                server {
-                    listen 8080;
-                    server_name "localhost";
-                    access_log /var/log/nginx/access.log;
-                    error_log /var/log/error.log ;
-                    location / {
-                    proxy_pass http://unix:/dev/shm/aii.sock;
-                    }
                 }
 EOF
         fi
