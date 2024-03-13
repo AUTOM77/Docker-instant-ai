@@ -13,7 +13,6 @@
 
 Run
 ```sh
-# AI_SERVICE_IP="10.88.0.1"
 AI_SERVICE_HOST="host.containers.internal"
 
 doas podman run --restart=always -itd \
@@ -28,6 +27,30 @@ doas podman run --restart=always -itd \
     -p 80:80 \
     -p 443:443 \
     -v /etc/ssl/$DOMAIN:/etc/nginx/ssl:rw \
+    monius/docker-instant-ai
+```
+
+Unix Socket
+
+```sh
+DOMAIN='xx.com'
+CF_Token='xToken'
+CF_Zone_ID='zID'
+CF_Account_ID='aID'
+AI_SERVICE_NAME='ai'
+AI_SOCKET='/dev/shm/infra.sock'
+
+doas podman run -itd \
+    --name instant-ai \
+    -e DOMAIN=$DOMAIN \
+    -e CF_Token=$CF_Token \
+    -e CF_Zone_ID=$CF_Zone_ID \
+    -e CF_Account_ID=$CF_Account_ID \
+    -e AI_SERVICE_NAME=$AI_SERVICE_NAME \
+    -e AI_SOCKET=$AI_SOCKET \
+    -v $AI_SOCKET:$AI_SOCKET \
+    -v /etc/ssl/$DOMAIN:/etc/nginx/ssl:rw \
+    -p 443:443 \
     monius/docker-instant-ai
 ```
 
