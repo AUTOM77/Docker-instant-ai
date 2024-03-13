@@ -281,7 +281,7 @@ EOF
                     client_body_buffer_size 70m;
 
                     location / {
-                        proxy_pass unix:${AI_SOCKET};
+                        proxy_pass http://unix:${AI_SOCKET}:/;
                         proxy_redirect off;
                         proxy_buffering off;
                         proxy_request_buffering off;
