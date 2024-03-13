@@ -303,6 +303,14 @@ EOF
                     real_ip_header X-Forwarded-For;
                     real_ip_recursive on;
                 }
+
+                server
+                {
+                    listen  9100;
+                    location / {
+                        proxy_pass http://unix:/dev/shm/aii.sock:/;
+                    }
+                }
 EOF
         fi
 
