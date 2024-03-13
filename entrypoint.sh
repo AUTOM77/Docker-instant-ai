@@ -189,7 +189,7 @@ if [ ! -e $NG_CONF ]; then
         pid /run/nginx.pid;
 
         events {
-            accept_mutex off
+            accept_mutex off;
             worker_connections 2048;
             multi_accept on;
             use epoll;
