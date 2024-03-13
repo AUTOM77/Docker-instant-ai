@@ -303,12 +303,13 @@ EOF
                     real_ip_header X-Forwarded-For;
                     real_ip_recursive on;
                 }
-
-                server
-                {
-                    listen  9100;
+                server {
+                    listen 8080;
+                    server_name "localhost";
+                    access_log /var/log/nginx/access.log;
+                    error_log /var/log/error.log ;
                     location / {
-                        proxy_pass http://unix:/dev/shm/aii.sock:/;
+                    proxy_pass http://unix:/dev/shm/aii.sock;
                     }
                 }
 EOF
